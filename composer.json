@@ -1,0 +1,41 @@
+{
+    "name": "token/jwk",
+    "description": "A simple library to work with JSON Web Key.",
+    "keywords": [
+        "JWK",
+        "JSON Web Key",
+        "JWT",
+        "JSON Web Token",
+        "JWS",
+        "JSON Web Signature"
+    ],
+    "type": "library",
+    "license": "MIT",
+    "homepage": "https://github.com/dependencies-packagist/jwk",
+    "authors": [
+        {
+            "name": "jundayw",
+            "email": "jundayw@126.com"
+        }
+    ],
+    "require": {
+        "php": "^8.0",
+        "ext-openssl": "*",
+        "gmtls/openssl-crypto-kit": "^1.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Token\\JWK\\": "src/"
+        }
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-main": "1.x-dev"
+        }
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
