@@ -8,11 +8,13 @@ use Token\JWK\Contracts\KeySetFactory as KeySetFactoryContract;
 
 class KeySetFactory implements KeySetFactoryContract
 {
+    protected static ?KeyFactoryContract $keyFactory = null;
+
     public function __construct(
-        private ?KeyFactoryContract $keyFactory = null,
+        KeyFactoryContract $keyFactory = null,
     )
     {
-        $this->keyFactory = $keyFactory ?? new KeyFactory();
+        self::$keyFactory = $keyFactory ?? new KeyFactory();
     }
 
     /**
@@ -20,11 +22,17 @@ class KeySetFactory implements KeySetFactoryContract
      *
      * @return static
      */
-    public function setKeyFactory(KeyFactoryContract $keyFactory): static
+    public static function setKeyFactory(KeyFactoryContract $keyFactory): static
     {
-        $this->keyFactory = $keyFactory;
+        return new static($keyFactory);
+    }
 
-        return $this;
+    /**
+     * @return KeyFactoryContract
+     */
+    protected static function getKeyFactory(): KeyFactoryContract
+    {
+        return self::$keyFactory ??= new KeyFactory();
     }
 
     /**
@@ -33,7 +41,7 @@ class KeySetFactory implements KeySetFactoryContract
      *
      * @return KeySetContract
      */
-    public function createFromJSON(string $json, string $passphraseKey = null): KeySetContract
+    public static function createFromJSON(string $json, string $passphraseKey = null): KeySetContract
     {
         $assoc = json_decode($json, true);
 
@@ -45,7 +53,7 @@ class KeySetFactory implements KeySetFactoryContract
 
         foreach ($assoc['keys'] as $key) {
             $passphrase  = $key[$passphraseKey] ?? null;
-            $keyFromJson = $this->keyFactory->createFromJson(json_encode($key), $passphrase);
+            $keyFromJson = self::getKeyFactory()->createFromJson(json_encode($key), $passphrase);
             $instance->addKey($keyFromJson);
         }
 

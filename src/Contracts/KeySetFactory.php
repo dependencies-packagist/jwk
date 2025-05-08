@@ -4,7 +4,7 @@ namespace Token\JWK\Contracts;
 
 interface KeySetFactory
 {
-    public function setKeyFactory(KeyFactory $keyFactory): static;
+    public static function setKeyFactory(KeyFactory $keyFactory): static;
 
-    public function createFromJSON(string $json, string $passphraseKey = null): KeySet;
+    public static function createFromJSON(string $json, string $passphraseKey = null): KeySet;
 }
