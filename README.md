@@ -18,6 +18,62 @@ composer require token/jwk
 
 ## Usage
 
+```php
+use Token\JWK\KeyFactory;
+use Token\JWK\KeySet;
+
+$publicKey = '-----BEGIN PUBLIC KEY-----
+MIIBIjANBg...
+-----END PUBLIC KEY-----';
+
+$key       = KeyFactory::createFromPem($publicKey, null, [
+    'use' => 'sig',
+]);
+
+$keys = new KeySet();
+$keys->addKey($key);
+echo $keys->jsonSerialize();
+```
+
+```json
+{
+    "keys": [
+        {
+            "use": "sig",
+            "kty": "RSA",
+            "n": "...",
+            "e": "...",
+            "kid": "urn:ietf:params:oauth:jwk-thumbprint:sha-256:ef-cEOUom1NztLRBBWGQjmRyaYCK4NwggwOdw-CXfAc"
+        }
+    ]
+}
+```
+
+```php
+use Token\JWK\KeySetFactory;
+
+foreach (KeySetFactory::createFromJSON($keys) as $key) {
+    var_dump($key->getKeyId());
+    var_dump($key->getPrivateKey());
+    var_dump($key->getPublicKey());
+}
+var_dump(KeySetFactory::createFromJSON($keys)->toArray());
+var_dump(KeySetFactory::createFromJSON($keys)->jsonSerialize());
+var_dump(KeySetFactory::createFromJSON($keys)->toString());
+var_dump(KeySetFactory::createFromJSON($keys)->getKeyById('S7_qdQ')->getKeyType());
+var_dump(KeySetFactory::createFromJSON($keys)->getKeyById('S7_qdQ')->getPublicKey());
+```
+
+```php
+use Token\JWK\Key;
+use Token\JWK\Thumbprint\ThumbprintURI;
+
+Key::computeThumbprint(function (array $keys) {
+    return md5(json_encode($keys));
+});
+Key::computeThumbprint([ThumbprintURI::class, 'computeThumbprintURI']);
+```
+
 ## License
 
 Nacosvel Contracts is made available under the MIT License (MIT). Please see [License File](LICENSE) for more information.
