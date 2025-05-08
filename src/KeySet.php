@@ -6,7 +6,6 @@ use ArrayIterator;
 use InvalidArgumentException;
 use Token\JWK\Contracts\Key;
 use Token\JWK\Contracts\KeySet as KeySetContract;
-use Traversable;
 
 class KeySet implements KeySetContract
 {
@@ -82,9 +81,9 @@ class KeySet implements KeySetContract
 
     /**
      * @inheritdoc
-     * @return Traversable
+     * @return Key[]
      */
-    public function getIterator(): Traversable
+    public function getIterator(): ArrayIterator
     {
         return new ArrayIterator($this->getKeys());
     }
