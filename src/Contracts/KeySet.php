@@ -16,4 +16,8 @@ interface KeySet extends Countable, JsonSerializable, IteratorAggregate, Stringa
     public function getKeyById(string $kid, string $use = Key::PUBLIC_KEY_USE_SIGNATURE): ?Key;
 
     public function getKeys(): array;
+
+    public function toArray(): array;
+
+    public function toString(): string;
 }

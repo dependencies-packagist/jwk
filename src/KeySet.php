@@ -4,22 +4,23 @@ namespace Token\JWK;
 
 use ArrayIterator;
 use InvalidArgumentException;
-use Token\JWK\Contracts\Key;
+use RuntimeException;
+use Token\JWK\Contracts\Key as KeyContract;
 use Token\JWK\Contracts\KeySet as KeySetContract;
 
 class KeySet implements KeySetContract
 {
     /**
-     * @var Key[]
+     * @var KeyContract[]
      */
     private array $keys = [];
 
     /**
-     * @param Key $key
+     * @param KeyContract $key
      *
      * @return static
      */
-    public function addKey(Key $key): static
+    public function addKey(KeyContract $key): static
     {
         if ($key->getKeyId() && $this->containsKey($key->getKeyId(), $key->getPublicKeyUse())) {
             throw new InvalidArgumentException(sprintf(
@@ -40,18 +41,23 @@ class KeySet implements KeySetContract
      *
      * @return bool
      */
-    public function containsKey(string $kid, string $use = Key::PUBLIC_KEY_USE_SIGNATURE): bool
+    public function containsKey(string $kid, string $use = KeyContract::PUBLIC_KEY_USE_SIGNATURE): bool
     {
-        return null !== $this->getKeyById($kid, $use);
+        try {
+            $this->getKeyById($kid, $use);
+        } catch (RuntimeException) {
+            return false;
+        }
+        return true;
     }
 
     /**
      * @param string $kid
      * @param string $use
      *
-     * @return Key|null
+     * @return KeyContract
      */
-    public function getKeyById(string $kid, string $use = Key::PUBLIC_KEY_USE_SIGNATURE): ?Key
+    public function getKeyById(string $kid, string $use = KeyContract::PUBLIC_KEY_USE_SIGNATURE): KeyContract
     {
         foreach ($this->getKeys() as $key) {
             if ($key->getKeyId() === $kid && $key->getPublicKeyUse() === $use) {
@@ -59,7 +65,7 @@ class KeySet implements KeySetContract
             }
         }
 
-        return null;
+        throw new RuntimeException("Key with id `$kid` and use `$use` not found");
     }
 
     /**
@@ -81,23 +87,19 @@ class KeySet implements KeySetContract
 
     /**
      * @inheritdoc
-     * @return Key[]
+     * @return KeyContract[]
      */
     public function getIterator(): ArrayIterator
     {
         return new ArrayIterator($this->getKeys());
     }
 
-    /**
-     * @inheritdoc
-     * @return array
-     */
-    public function jsonSerialize(): array
+    public function toArray(): array
     {
         $ret = [];
 
         foreach ($this->getKeys() as $key) {
-            $ret[$key->getKeyId()] = $key->jsonSerialize();
+            $ret[$key->getKeyId()] = $key->toArray();
         }
 
         return [
@@ -105,9 +107,18 @@ class KeySet implements KeySetContract
         ];
     }
 
+    /**
+     * @inheritdoc
+     * @return string
+     */
+    public function jsonSerialize(): string
+    {
+        return json_encode($this->toArray(), JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
+    }
+
     public function toString(): string
     {
-        return json_encode($this->jsonSerialize(), JSON_PRETTY_PRINT);
+        return json_encode($this->toArray(), JSON_UNESCAPED_SLASHES);
     }
 
     /**
