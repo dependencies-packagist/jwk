@@ -21,8 +21,8 @@
     "require": {
         "php": "^8.0",
         "ext-openssl": "*",
-        "gmtls/openssl-crypto-kit": "^1.0",
-        "standards/urn": "^1.0"
+        "gmtls/openssl-crypto-kit": "^3.0",
+        "standards/urn": "^2.0"
     },
     "autoload": {
         "psr-4": {

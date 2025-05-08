@@ -3,8 +3,8 @@
 namespace Token\JWK\Thumbprint;
 
 use InvalidArgumentException;
-use Standards\NSS;
-use Standards\URN;
+use Standards\URN\NamespaceSpecificString;
+use Standards\URN\UniformResourceName;
 
 class ThumbprintURI
 {
@@ -12,10 +12,10 @@ class ThumbprintURI
     {
         $thumbprint = Thumbprint::compute($jwk, $alg);
         $alg        = Thumbprint::getHashAlgorithm($alg);
-        return URN::build('ietf', NSS::build(type: $alg, value: $thumbprint));
+        return UniformResourceName::build('ietf', NamespaceSpecificString::build(type: $alg, value: $thumbprint));
     }
 
-    public static function parse(string $uri): NSS
+    public static function parse(string $uri): UniformResourceName
     {
         $pattern = '/^urn:ietf:params:oauth:jwk-thumbprint:([^:]+):(.+)$/';
 
@@ -23,6 +23,6 @@ class ThumbprintURI
             throw new InvalidArgumentException("Invalid JWK thumbprint URN: {$uri}");
         }
 
-        return NSS::parse(URN::parse($uri)->getNSS());
+        return UniformResourceName::parse($uri);
     }
 }
