@@ -18,7 +18,7 @@ composer require token/jwk
 
 ## Usage
 
-### Create a key
+### 创建一个 Key / Create a Key
 
 ```php
 use Token\JWK\Key;
@@ -36,7 +36,7 @@ $key->put('other', 'other-value');
 echo $key->jsonSerialize();
 ```
 
-Output:
+输出 / Output:
 
 ```json
 {
@@ -49,7 +49,7 @@ Output:
 }
 ```
 
-### Create a KeySet from a publicKey
+### 从 PEM 公钥创建 KeySet / Create a KeySet from Public Key
 
 ```php
 use Token\JWK\KeyFactory;
@@ -62,7 +62,7 @@ $keys->addKey($key);
 echo $keys->jsonSerialize();
 ```
 
-Output:
+输出 / Output:
 
 ```json
 {
@@ -78,7 +78,7 @@ Output:
 }
 ```
 
-### Parse a KeySet
+### 解析 KeySet / Parse a KeySet
 
 ```php
 use Token\JWK\KeySetFactory;
@@ -96,13 +96,11 @@ var_dump(KeySetFactory::createFromJSON($keys)->getKeyById('S7_qdQ')->getKeyType(
 var_dump(KeySetFactory::createFromJSON($keys)->getKeyById('S7_qdQ')->getPublicKey());
 ```
 
-### Customizing Key Thumbprint Calculation
+### 自定义 Thumbprint 算法 / Customizing Thumbprint Generation
 
-The `Key::computeThumbprint()` static method allows you to customize how a JWK (JSON Web Key) thumbprint is computed. This is useful when you want to define your own logic for generating a unique key identifier.
+您可以使用 `Key::computeThumbprint()` 方法覆盖默认的 thumbprint 生成逻辑。
 
-#### Example 1: Use a Custom Closure
-
-You can define your own thumbprint logic using a closure:
+#### 方式 1: 使用闭包 / With a Closure
 
 ```php
 use Token\JWK\Key;
@@ -112,11 +110,7 @@ Key::computeThumbprint(function (array $keyData) {
 });
 ```
 
-This will override the default thumbprint behavior, using an MD5 hash of the serialized key data.
-
-#### Example 2: Use a Static Method as Callable
-
-You can also use a static method from a custom class:
+#### 方式 2: 使用类静态方法 / With Static Method
 
 ```php
 use Token\JWK\Key;
@@ -125,11 +119,9 @@ use Token\JWK\Thumbprint\ThumbprintURI;
 Key::computeThumbprint([ThumbprintURI::class, 'computeThumbprintURI']);
 ```
 
-This approach delegates the thumbprint generation to the `computeThumbprintURI()` method inside the `ThumbprintURI` class.
+#### 注意 / Note:
 
-#### Note
-
-* The callback must be a `callable` that receives an array representing the JWK and returns a string thumbprint.
+* 回调必须是 `callable`，接受一个数组并返回字符串。
 
 ---
 

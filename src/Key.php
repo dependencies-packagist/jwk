@@ -19,6 +19,9 @@ class Key implements KeyContract
         if (!array_key_exists('kid', $this->keys)) {
             $this->keys['kid'] = self::keyIDFromThumbprint($keys);
         }
+        if (!array_key_exists('use', $this->keys)) {
+            $this->keys['use'] = self::PUBLIC_KEY_USE_SIGNATURE;
+        }
     }
 
     public static function computeThumbprint(callable $callback): void
@@ -138,6 +141,23 @@ class Key implements KeyContract
     public function getCurveName(): ?string
     {
         return $this->keys['crv'] ?? null;
+    }
+
+    public function push(array $keys): static
+    {
+        $this->keys = array_merge($this->keys, $keys);
+        return $this;
+    }
+
+    public function put(string $key, mixed $value): static
+    {
+        $this->keys[$key] = $value;
+        return $this;
+    }
+
+    public function get(string $key): mixed
+    {
+        return $this->keys[$key] ?? null;
     }
 
     /**

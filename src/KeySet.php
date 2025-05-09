@@ -3,8 +3,6 @@
 namespace Token\JWK;
 
 use ArrayIterator;
-use InvalidArgumentException;
-use RuntimeException;
 use Token\JWK\Contracts\Key as KeyContract;
 use Token\JWK\Contracts\KeySet as KeySetContract;
 
@@ -17,17 +15,14 @@ class KeySet implements KeySetContract
 
     /**
      * @param KeyContract $key
+     * @param bool        $replace
      *
      * @return static
      */
-    public function addKey(KeyContract $key): static
+    public function addKey(KeyContract $key, bool $replace = false): static
     {
-        if ($key->getKeyId() && $this->containsKey($key->getKeyId(), $key->getPublicKeyUse())) {
-            throw new InvalidArgumentException(sprintf(
-                'Key with id `%s` and use `%s` already exists in the set',
-                $key->getKeyId(),
-                $key->getPublicKeyUse()
-            ));
+        if ($replace && $this->containsKey($key->getKeyId(), $key->getPublicKeyUse())) {
+            $this->removeKeyById($key->getKeyId(), $key->getPublicKeyUse());
         }
 
         $this->keys[] = $key;
@@ -36,36 +31,66 @@ class KeySet implements KeySetContract
     }
 
     /**
-     * @param string $kid
-     * @param string $use
+     * @param KeyContract $key
      *
-     * @return bool
+     * @return static
      */
-    public function containsKey(string $kid, string $use = KeyContract::PUBLIC_KEY_USE_SIGNATURE): bool
+    public function removeKey(KeyContract $key): static
     {
-        try {
-            $this->getKeyById($kid, $use);
-        } catch (RuntimeException) {
-            return false;
-        }
-        return true;
+        return $this->removeKeyById($key->getKeyId(), $key->getPublicKeyUse());
     }
 
     /**
-     * @param string $kid
-     * @param string $use
+     * @param string      $kid
+     * @param string|null $use
      *
-     * @return KeyContract
+     * @return static
      */
-    public function getKeyById(string $kid, string $use = KeyContract::PUBLIC_KEY_USE_SIGNATURE): KeyContract
+    public function removeKeyById(string $kid, string $use = null): static
+    {
+        return array_filter($this->keys, function (KeyContract $key) use ($kid, $use) {
+            return false === $this->matchesKeyConditions($key, $kid, $use);
+        });
+    }
+
+    /**
+     * @param string      $kid
+     * @param string|null $use
+     *
+     * @return bool
+     */
+    public function containsKey(string $kid, string $use = null): bool
+    {
+        return $this->getKeyById($kid, $use) !== null;
+    }
+
+    /**
+     * @param string      $kid
+     * @param string|null $use
+     *
+     * @return KeyContract|null
+     */
+    public function getKeyById(string $kid, string $use = null): ?KeyContract
     {
         foreach ($this->getKeys() as $key) {
-            if ($key->getKeyId() === $kid && $key->getPublicKeyUse() === $use) {
+            if ($this->matchesKeyConditions($key, $kid, $use)) {
                 return $key;
             }
         }
 
-        throw new RuntimeException("Key with id `$kid` and use `$use` not found");
+        return null;
+    }
+
+    /**
+     * @param KeyContract $key
+     * @param string      $kid
+     * @param string|null $use
+     *
+     * @return bool
+     */
+    public function matchesKeyConditions(KeyContract $key, string $kid, string $use = null): bool
+    {
+        return $key->getKeyId() === $kid && (is_null($use) || $key->getPublicKeyUse() === $use);
     }
 
     /**
