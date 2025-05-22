@@ -4,6 +4,7 @@ namespace Token\JWK;
 
 use Closure;
 use GmTLS\CryptoKit\KeypairLoader;
+use GmTLS\CryptoKit\KeypairParser;
 use InvalidArgumentException;
 use Token\JWK\Contracts\Key as KeyContract;
 use Token\JWK\Contracts\KeyFactory as KeyFactoryContract;
@@ -59,9 +60,9 @@ class KeyFactory implements KeyFactoryContract
     protected static function getJSONWebKey(string $pem, string $passphrase = null, array $details = [], bool $isPublicKey = true): array
     {
         if ($isPublicKey) {
-            $keys = KeypairLoader::fromPublicKeyString($pem)->parse()->toPublicKey('JWK');
+            $keys = KeypairParser::create(KeypairLoader::fromPublicKeyString($pem))->toPublicKey('JWK');
         } else {
-            $keys = KeypairLoader::fromPrivateKeyString($pem, $passphrase)->parse()->toPrivateKey('JWK');
+            $keys = KeypairParser::create(KeypairLoader::fromPrivateKeyString($pem, $passphrase))->toPrivateKey('JWK');
         }
 
         $keys = json_decode($keys, true);
